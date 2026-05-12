@@ -134,7 +134,7 @@ Ota yhteyttä — rakennetaan yhdessä seuraava voicebot ja kyselyagenttisi.
 
 ## Puheluiden hallinta (FSM) *video*
 
-[![Puheluiden hallinta (FSM)](https://img.youtube.com/vi/e1lIGgbVQ4E/0.jpg)](https://youtu.be/e1lIGgbVQ4E)
+[![Puheluiden hallinta (FSM)](https://img.youtube.com/vi/pP8YEVTldic/hqdefault.jpg)](https://youtu.be/pP8YEVTldic)
 
 ---
 
