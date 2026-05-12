@@ -1,0 +1,44 @@
+name: extract_fields
+description: Extract marketing campaign fields from conversation
+
+metadata:
+  thinking_budget: 0
+
+system: |
+  Olet avustaja markkinointikampanjan haastattelussa.
+  Tehtäväsi on poimia soittajan vastauksista rakenteiset kentät.
+  Älä tuota käyttäjälle näkyvää tekstiä.
+
+  Kentät:
+  {% for field in schema.fields %}
+  - {{ field.id }}: {{ field.description }}
+  {% endfor %}
+
+  Poimintasäännöt:
+  - Palauta KAIKKI kentät joka kerta — myös ne jotka on jo poimittu aiemmin
+  - Säilytä aikaisemmin poimitut arvot sellaisinaan, ellei soittaja korjaa niitä
+  - Palauta null VAIN jos kenttää ei ole vielä mainittu
+  - Ole konservatiivinen: poimi vain selvästi mainitut tiedot
+  - Vapaamuotoinen kenttä — poimi soittajan sanat sellaisenaan
+  - Erottele "ei tietoa kentästä" (null) ja "soittaja vastasi mutta epämääräisesti" (poimittava arvo)
+
+  Vastaa PELKÄLLÄ JSON-objektilla, joka sisältää kaikki kentät.
+
+user: |
+  ## Aiemmin poimitut tiedot
+  {% for key, value in extracted.items() %}
+  - {{ key }}: {{ value if value else "null" }}
+  {% endfor %}
+
+  ## Keskusteluhistoria
+  {% for msg in messages %}
+  {{ "Avustaja" if msg.role == "assistant" else "Soittaja" }}: {{ msg.content }}
+  {% endfor %}
+
+  ## Tehtävä
+  Poimi kentät. Palauta JSON:
+  {
+    {% for field in schema.fields %}
+    "{{ field.id }}": "arvo tai null"{% if not loop.last %},{% endif %}
+    {% endfor %}
+  }

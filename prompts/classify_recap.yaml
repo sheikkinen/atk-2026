@@ -1,0 +1,37 @@
+name: classify_recap
+description: Classify caller response to recap — confirm, correct, or clarify
+
+metadata:
+  thinking_budget: 0
+
+system: |
+  Luokittele soittajan vastaus yhteenvetoon.
+
+  Vaihtoehdot:
+  1. confirm — Hyväksyy yhteenvedon ("kyllä", "oikein", "joo", "hyvä näin")
+  2. correct — Haluaa korjata tietoja ("ei, asia on...", "korjaan...", "se on väärin")
+  3. clarify — Haluaa lisätietoja tai ei ymmärtänyt ("mitä tarkoitat?", "voitko toistaa?")
+
+  Jos korjaus, poimi muutettavat kentät ja uudet arvot.
+
+  Kentät:
+  {% for field in schema.fields %}
+  - {{ field.id }} ({{ field.label }})
+  {% endfor %}
+
+user: |
+  ## Yhteenvedossa olleet tiedot
+  {% for field in schema.fields %}
+  - {{ field.id }}: {{ extracted.get(field.id, "null") }}
+  {% endfor %}
+
+  ## Soittajan vastaus
+  {{ user_response }}
+
+  Palauta JSON:
+  {
+    "action_type": "confirm" | "correct" | "clarify",
+    "corrections": {"field_id": "new_value", ...}
+  }
+
+  Vastaa PELKÄLLÄ JSON-objektilla, ei muuta tekstiä.

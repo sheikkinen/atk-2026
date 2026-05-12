@@ -1,0 +1,339 @@
+# FR-297: Marketing campaign questionnaire graph.
+# Schema-driven: 3 fields defined in schema.yaml (name, organization, quote).
+# Cloned from callback_other_topic (NC-254); adapted for marketing extraction.
+# Self-contained interrupt pattern — extract+probe loop → recap → deliver.
+version: "1.0"
+name: callback-marketing
+
+metadata:
+  thinking_budget: 0
+
+checkpointer:
+  type: memory
+
+loop_limits:
+  extract_fields: 8
+  normalize_extracted: 8
+  generate_probe: 8
+  detect_gaps: 8
+  append_probe_response: 8
+  ask_probe: 8
+  append_probe_message: 8
+  prune_messages: 8
+  generate_recap: 5
+  store_recap_summary: 5
+  append_recap_response: 5
+  ask_recap: 5
+  append_recap_message: 5
+  classify_recap: 5
+  apply_corrections: 5
+
+defaults:
+  prompts_relative: true
+  prompts_dir: prompts
+
+state:
+  user_message: str
+  prior_messages: list
+  original_intent: str
+  schema: dict
+  messages: list
+  extracted: dict
+  gaps: list
+  has_gaps: bool
+  recap_action: dict
+  recap_summary: str
+  sms_to: str
+  delivery_result: dict
+  response: str
+  phase: str
+  complete: bool
+  result: dict
+
+tools:
+  load_schema:
+    type: python
+    module: graphs.callback_marketing.callback_marketing
+    function: load_schema
+  normalize_extracted:
+    type: python
+    module: graphs.callback_marketing.callback_marketing
+    function: normalize_extracted
+  detect_gaps:
+    type: python
+    module: graphs.callback_marketing.callback_marketing
+    function: detect_gaps
+  apply_corrections:
+    type: python
+    module: graphs._common.handlers
+    function: apply_corrections
+  append_user_message:
+    type: python
+    module: graphs._common.handlers
+    function: append_user_message
+  append_assistant_message:
+    type: python
+    module: graphs._common.handlers
+    function: append_assistant_message
+  prune_messages:
+    type: python
+    module: graphs._common.handlers
+    function: prune_messages
+  store_recap_summary:
+    type: python
+    module: graphs._common.handlers
+    function: store_recap_summary
+  mark_complete:
+    type: python
+    module: graphs._common.handlers
+    function: mark_complete
+  send_results:
+    type: python
+    module: services.result_delivery
+    function: send_results
+  init_with_context:
+    type: python
+    module: graphs._common.handlers
+    function: init_with_context
+
+nodes:
+  # --- Initialization (NV-242: seeds messages from navigator conversation) ---
+  init:
+    type: python
+    tool: init_with_context
+    state_key: messages
+
+  load_schema:
+    type: python
+    tool: load_schema
+    state_key: schema
+
+  # --- Opening ---
+  generate_opening:
+    type: passthrough
+    output:
+      response: "{state.schema.opening}"
+
+  append_opening_response:
+    type: python
+    tool: append_assistant_message
+    state_key: messages
+
+  ask_opening:
+    type: interrupt
+    state_key: response
+    resume_key: user_message
+
+  append_opening_message:
+    type: python
+    tool: append_user_message
+    state_key: messages
+
+  # --- Extraction + Probing ---
+  extract_fields:
+    type: race
+    prompt: extract_fields
+    parse_json: true
+    timeout: 10.0
+    variables:
+      schema: "{state.schema}"
+      messages: "{state.messages}"
+      extracted: "{state.extracted}"
+    state_key: extracted
+    candidates:
+      - { provider: vertex, model: gemini-2.5-flash }
+      - { provider: azure, model: aaa-gpt-5.4-mini }
+
+  normalize_extracted:
+    type: python
+    tool: normalize_extracted
+
+  detect_gaps:
+    type: python
+    tool: detect_gaps
+    state_key: gaps
+
+  generate_probe:
+    type: race
+    prompt: generate_probe
+    timeout: 10.0
+    variables:
+      schema: "{state.schema}"
+      extracted: "{state.extracted}"
+      gaps: "{state.gaps}"
+    state_key: response
+    skip_if_exists: false
+    candidates:
+      - { provider: vertex, model: gemini-2.5-flash }
+      - { provider: azure, model: aaa-gpt-5.4-mini }
+
+  append_probe_response:
+    type: python
+    tool: append_assistant_message
+    state_key: messages
+
+  ask_probe:
+    type: interrupt
+    state_key: response
+    resume_key: user_message
+
+  append_probe_message:
+    type: python
+    tool: append_user_message
+    state_key: messages
+
+  prune_messages:
+    type: python
+    tool: prune_messages
+    state_key: messages
+
+  # --- Recap ---
+  set_recap_phase:
+    type: passthrough
+    output:
+      phase: recap
+
+  generate_recap:
+    type: race
+    prompt: recap
+    timeout: 10.0
+    variables:
+      schema: "{state.schema}"
+      extracted: "{state.extracted}"
+    state_key: response
+    skip_if_exists: false
+    candidates:
+      - { provider: vertex, model: gemini-2.5-flash }
+      - { provider: azure, model: aaa-gpt-5.4-mini }
+
+  store_recap_summary:
+    type: python
+    tool: store_recap_summary
+    state_key: recap_summary
+
+  append_recap_response:
+    type: python
+    tool: append_assistant_message
+    state_key: messages
+
+  ask_recap:
+    type: interrupt
+    state_key: response
+    resume_key: user_message
+
+  append_recap_message:
+    type: python
+    tool: append_user_message
+    state_key: messages
+
+  classify_recap:
+    type: race
+    prompt: classify_recap
+    parse_json: true
+    timeout: 10.0
+    variables:
+      schema: "{state.schema}"
+      extracted: "{state.extracted}"
+      user_response: "{state.user_message}"
+    state_key: recap_action
+    skip_if_exists: false
+    candidates:
+      - { provider: vertex, model: gemini-2.5-flash }
+      - { provider: azure, model: aaa-gpt-5.4-mini }
+
+  apply_corrections:
+    type: python
+    tool: apply_corrections
+    state_key: extracted
+
+  # --- Finalization ---
+  mark_complete:
+    type: python
+    tool: mark_complete
+    state_key: complete
+
+  send_results:
+    type: python
+    tool: send_results
+    state_key: delivery_result
+
+  generate_farewell:
+    type: passthrough
+    output:
+      response: "{state.schema.farewell}"
+
+edges:
+  # Initialization
+  - from: START
+    to: init
+  - from: init
+    to: load_schema
+
+  # Opening flow
+  - from: load_schema
+    to: generate_opening
+  - from: generate_opening
+    to: append_opening_response
+  - from: append_opening_response
+    to: ask_opening
+  - from: ask_opening
+    to: append_opening_message
+  - from: append_opening_message
+    to: extract_fields
+
+  # Probing loop
+  - from: extract_fields
+    to: normalize_extracted
+  - from: normalize_extracted
+    to: detect_gaps
+  - from: detect_gaps
+    to: generate_probe
+    condition: "has_gaps == true"
+  - from: detect_gaps
+    to: set_recap_phase
+    condition: "has_gaps == false"
+  - from: generate_probe
+    to: append_probe_response
+  - from: append_probe_response
+    to: ask_probe
+  - from: ask_probe
+    to: append_probe_message
+  - from: append_probe_message
+    to: prune_messages
+  - from: prune_messages
+    to: extract_fields
+
+  # Recap flow
+  - from: set_recap_phase
+    to: generate_recap
+  - from: generate_recap
+    to: store_recap_summary
+  - from: store_recap_summary
+    to: append_recap_response
+  - from: append_recap_response
+    to: ask_recap
+  - from: ask_recap
+    to: append_recap_message
+  - from: append_recap_message
+    to: classify_recap
+
+  # Recap routing
+  - from: classify_recap
+    to: mark_complete
+    condition: "recap_action.action_type == 'confirm'"
+  - from: classify_recap
+    to: apply_corrections
+    condition: "recap_action.action_type == 'correct'"
+  - from: classify_recap
+    to: generate_recap
+    condition: "recap_action.action_type == 'clarify'"
+  - from: apply_corrections
+    to: generate_recap
+
+  # Finalization
+  - from: mark_complete
+    to: send_results
+  - from: send_results
+    to: generate_farewell
+  - from: generate_farewell
+    to: END

@@ -1,0 +1,38 @@
+# FR-297: Marketing campaign questionnaire schema.
+# 3-field marketing testimonial extraction.
+
+name: Marketing-kampanjan suosittelukysely
+description: >
+  Markkinointikampanjan puhelinhaastattelu — kerätään nimi,
+  organisaatio ja suosittelulause.
+version: "1.0"
+language: fi
+
+opening: >-
+  Hei, olen Hieronta Maatti. Millä nimellä kutsumme teidät?
+farewell: >-
+  Kiitoksia. Kutsumme teidät mahdollisimman pian.
+
+fields:
+  - id: name
+    label: Nimi
+    description: Vastaajan koko nimi
+    required: true
+    type: string
+  - id: organization
+    label: Organisaatio
+    description: Vastaajan organisaatio tai yritys
+    required: true
+    type: string
+  - id: memento_atk_days
+    label: Muisto ATK-päiviltä
+    description: Mukava muisto näiltä tai aiemmilta ATK-päiviltä
+    required: true
+    type: string
+  - id: miscellaneous
+    label: Muuta tietoa
+    description: Muita tietoja, joita vastaaja haluaa jakaa (vapaaehtoinen)
+    required: false
+    type: string
+
+

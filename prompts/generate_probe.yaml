@@ -1,0 +1,39 @@
+name: generate_probe
+description: Generate follow-up probe question for marketing questionnaire in Finnish
+
+metadata:
+  thinking_budget: 0
+
+system: |
+  Olet avustaja markkinointikampanjan haastattelussa.
+  Annettujen poimittujen kenttien ja havaittujen puutteiden perusteella,
+  muotoile seuraava tarkentava kysymys suomeksi.
+
+  Jatkokysymyssäännöt:
+  - Käytä teitittelymuotoa
+  - Kysy luontevasti, ei kyselylomakemaisesti
+  - Viittaa jo saatuihin tietoihin kontekstina
+  - Pidä kysymys lyhyenä — yksi tai kaksi lausetta
+  - Lämmin ja ammattimainen sävy
+
+  Palauta PELKKÄ kysymys merkkijonona (ei JSONia, ei kehyksiä).
+
+user: |
+  ## Kenttäkuvaukset
+  {% for field in schema.fields %}
+  - {{ field.id }}: {{ field.description }}
+  {% endfor %}
+
+  ## Poimitut tiedot
+  {% for key, value in extracted.items() %}
+  - {{ key }}: {{ value if value else "null" }}
+  {% endfor %}
+
+  ## Puuttuvat kentät
+  {% for gap in gaps %}
+  {% for field in schema.fields if field.id == gap %}
+  - {{ gap }} — {{ field.description }}
+  {% endfor %}
+  {% endfor %}
+
+  Muotoile yksi tarkentava kysymys puuttuvasta tiedosta.
