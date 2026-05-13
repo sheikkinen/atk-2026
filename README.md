@@ -2,8 +2,6 @@
 
 > **ATK-2026** | Tekoälypuhelinhaastattelu
 
-## Mikä tämä on?
-
 Tekoälypohjainen puhelinhaastattelijabotti, joka käy luonnollisen
 vuoropuhelun soittajan kanssa ja kerää rakenteista tietoa — ilman lomakkeita.
 
@@ -70,7 +68,7 @@ Kaikki promptit käyttävät luontevaa suomen kieltä ja välttävät lomakemais
 
 ### 3. Skeema — vaihtuu kyselystä toiseen (`schema.yaml`)
 
-Skeema on ainoa tiedosto, joka muuttuu kampanjasta toiseen. Se määrittää
+Skeema on ainoa tiedosto, joka muuttuu kyselystä toiseen. Se määrittää
 mitä kerätään, miten botti esittäytyy ja miten puhelu päättyy.
 
 ```yaml
@@ -101,7 +99,13 @@ fields:
     required: false
 ```
 
-Uusi kampanja = uusi `schema.yaml`. Graafia tai prompteja ei tarvitse koskea.
+Uusi kysely = uusi `schema.yaml`. Graafiin tai prompteihin ei tarvitse koskea.
+
+---
+
+## Konsepti
+
+![Konsepti](img/atk-3.webp)
 
 ---
 
@@ -112,7 +116,7 @@ Soittaja ←→ PSTN ←→ Agenttialusta (FSM) ←→ Integraatiot
                             │
                   ┌─────────┴──────────┐
                   │   graph.yaml       │  ← YAMLGraph
-                  │   schema.yaml      │  ← vaihtuu per kampanja
+                  │   schema.yaml      │  ← vaihtuu per kysely
                   │   prompts/         │  ← yhteiskäyttöiset
                   └────────────────────┘
                 
@@ -120,7 +124,9 @@ Soittaja ←→ PSTN ←→ Agenttialusta (FSM) ←→ Integraatiot
 
 ---
 
-*Asiakaspalvelun agenttialusta · YAMLGraph-pohjainen puhelintekoäly*
+## Puheluiden hallinta (FSM) *video*
+
+[![Puheluiden hallinta (FSM)](https://img.youtube.com/vi/pP8YEVTldic/hqdefault.jpg)](https://youtu.be/pP8YEVTldic)
 
 ---
 
@@ -132,9 +138,7 @@ Ota yhteyttä — rakennetaan yhdessä seuraava voicebot ja kyselyagenttisi.
 
 ---
 
-## Puheluiden hallinta (FSM) *video*
-
-[![Puheluiden hallinta (FSM)](https://img.youtube.com/vi/pP8YEVTldic/hqdefault.jpg)](https://youtu.be/pP8YEVTldic)
+*Asiakaspalvelun agenttialusta · YAMLGraph-pohjainen puhelintekoäly*
 
 ---
 
