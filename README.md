@@ -145,3 +145,4 @@ Ota yhteyttä — rakennetaan yhdessä seuraava voicebot ja kyselyagenttisi.
 | [sheikkinen/yamlgraph](https://github.com/sheikkinen/yamlgraph) | YAMLGraph-kehys — graafi, promptit, skeema |
 | [sheikkinen/statemachine-engine](https://github.com/sheikkinen/statemachine-engine) | Moottori puheluiden hallintaan |
 | [sheikkinen/synthetic-finnish-journal](https://github.com/sheikkinen/synthetic-finnish-journal) | Muita käyttökohteita YAMLGraphille |
+ [sheikkinen/scripture-dev](https://github.com/sheikkinen/scripture-dev) | Vaatimusten jäljitettävyyden takaava AI-kehitysprosessi | 
