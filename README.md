@@ -2,12 +2,13 @@
 
 > **ATK-2026** | Tekoälypuhelinhaastattelu
 
-Tekoälypohjainen puhelinhaastattelijabotti, joka käy luonnollisen
-vuoropuhelun soittajan kanssa ja kerää rakenteista tietoa — ilman lomakkeita.
+Tekoälypohjainen puhelinhaastattelijabotti, joka käy luonnollisen vuoropuhelun soittajan kanssa ja kerää rakenteista tietoa — ilman lomakkeita.
 
-Botti esittäytyy, kysyy tarvittavat tiedot, toistaa ne ääneen ja tallentaa
-vasta vahvistuksen jälkeen. Tässä demossa botti on nimeltään **Hieronta Maatti**
-ja kerää ATK-2026-tapahtuman osallistujien muistoja ja yhteystietoja.
+Botti esittäytyy, kysyy tarvittavat tiedot, toistaa ne ääneen ja tallentaa vasta vahvistuksen jälkeen. Tässä demossa botti on nimeltään **Hieronta Maatti** ja kerää ATK-2026-tapahtuman osallistujien muistoja ja yhteystietoja.
+
+
+![Konsepti](img/atk-3.webp)
+*Kuva: Konsepti tiivistetysti*
 
 ---
 
@@ -41,21 +42,17 @@ Sama rakenne toimii kaikissa kyselyissä. Ainoastaan skeema vaihtuu.
 
 ### 1. Graafi — pysyy samana (`graph.yaml`)
 
-Graafi toteuttaa yllä olevan neljän vaiheen rakenteen. Se on kirjoitettu
-kerran ja toimii sellaisenaan kaikissa kyselyissä.
+Graafi toteuttaa yllä olevan neljän vaiheen rakenteen. Se on kirjoitettu kerran ja toimii sellaisenaan kaikissa kyselyissä.
 
 ```
 START → init → load_schema → avaus → [luotaussilmukka] → yhteenveto → tallennus → END
 ```
 
-Graafi ei sisällä mitään kyselykohtaista — kentät, tekstit ja kysymykset
-tulevat skeemasta.
+Graafi ei sisällä mitään kyselykohtaista — kentät, tekstit ja kysymykset tulevat skeemasta.
 
 ### 2. Promptit — lähes samat kaikissa kyselyissä (`prompts/`)
 
-Neljä promptia hoitaa koko vuoropuhelun logiikan. Ne lukevat kenttäkuvaukset
-skeemasta, joten ne toimivat uudessa kyselyssä ilman muutoksia tai pienellä
-säätämisellä.
+Neljä promptia hoitaa koko vuoropuhelun logiikan. Ne lukevat kenttäkuvaukset skeemasta, joten ne toimivat uudessa kyselyssä ilman muutoksia tai pienellä säätämisellä.
 
 | Prompti | Tehtävä |
 |---------|---------|
@@ -68,8 +65,7 @@ Kaikki promptit käyttävät luontevaa suomen kieltä ja välttävät lomakemais
 
 ### 3. Skeema — vaihtuu kyselystä toiseen (`schema.yaml`)
 
-Skeema on ainoa tiedosto, joka muuttuu kyselystä toiseen. Se määrittää
-mitä kerätään, miten botti esittäytyy ja miten puhelu päättyy.
+Skeema on ainoa tiedosto, joka muuttuu kyselystä toiseen. Se määrittää mitä kerätään, miten botti esittäytyy ja miten puhelu päättyy.
 
 ```yaml
 # schema.yaml — ATK-2026-esimerkki
@@ -100,12 +96,6 @@ fields:
 ```
 
 Uusi kysely = uusi `schema.yaml`. Graafiin tai prompteihin ei tarvitse koskea.
-
----
-
-## Konsepti
-
-![Konsepti](img/atk-3.webp)
 
 ---
 
